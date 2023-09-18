@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game probability</title>
+    <style>
+
+    </style>
+</head>
+<body>
+    <label for="myfile">Select a csv file:</label>
+    <input type="file" id="csv" name="myfile" accept=".csv">
+
+    <p>Best probability:</p>
+    <div id="result"></div>
+
+    <p>All probabilities:</p>
+    <form id="form">
+        <div id="all"></div>
+
+    </form>
+    <script>
+        const fileInput = document.getElementById('csv');
+        const readFile = () => {
+        const reader = new FileReader()
+        reader.onload = () => {
+            calculateProbability(reader.result);
+        }
+        // start reading the file. When it is done, calls the onload event defined above.
+        reader.readAsBinaryString(fileInput.files[0])
+        }
+
+        fileInput.addEventListener('change', readFile);
+
+
+        function calculateProbability(content){
+            //making content as array
+            content = content.split("\n");
+            //removing first row
+            content.shift();
+
+            //init new arrays to fill
+            var card_suit = [];
+            var animal_name = [];
+            var fruit = [];
+
+            content.forEach(function (item, index) {
+                //making array
+                var split_item = item.split(',');
+
+                //setting new variablles
+                var row_result = split_item[3];
+                var row_card_suit = split_item[0];
+                var row_animal_name = split_item[1];
+                var row_fruit = split_item[2];
+
+                //if the combination beats the boss add each to its corresponding array
+                if(row_result == 'True'){
+                    card_suit.push(row_card_suit);
+                    animal_name.push(row_animal_name);
+                    fruit.push(row_fruit);
+                }
+            });
+
+            //return best probability results
+            var card_suit_best_choice = ' Card suit: ' + mode(card_suit) + "<br>";
+            var animal_name_best_choice = 'Animal name: ' + mode(animal_name) + "<br>";
+            var fruit_best_choice = 'Fruit: ' + mode(fruit);
+
+            document.getElementById('result').innerHTML = card_suit_best_choice + animal_name_best_choice + fruit_best_choice;
+
+            document.getElementById('all').innerHTML =  repeats(card_suit , 'fav_card_suit') + "<br>" + repeats(animal_name , 'fav_animal_name') + "<br>" + repeats(fruit , 'fav_fruit') + "<button style='margin-top:20px;' type='button' onclick='calculateValue()'> submit </button>";
+
+        }
+
+        function calculateValue(){
+            //calc
+        }
+
+        //check the most repeated string in array
+        function mode(array)
+        {
+            if(array.length == 0)
+                return null;
+            var modeMap = {};
+            var maxEl = array[0], maxCount = 1;
+            for(var i = 0; i < array.length; i++)
+            {
+                var el = array[i];
+                if(modeMap[el] == null)
+                    modeMap[el] = 1;
+                else
+                    modeMap[el]++;  
+                if(modeMap[el] > maxCount)
+                {
+                    maxEl = el;
+                    maxCount = modeMap[el];
+                }
+            }
+            return maxEl;
+        }
+
+        function repeats(array , name){
+            var counts = {};
+            array_length = array.length;
+            array.forEach(function (x) {
+                 counts[x] = (counts[x] || 0) + 1;                  
+            });
+            console.log(counts);
+
+            var counts_1 = {};
+            Object.keys(counts).forEach(key => {
+                counts_1[key] = ((counts[key]*100)/array_length);
+            });
+    
+
+            counts = objToString(counts_1 , name , counts);
+            return counts;
+        }
+
+        function objToString (obj , name , obj_1) {
+            var str = 'Choose one: <br>';
+            for (var p in obj) {
+                if (Object.prototype.hasOwnProperty.call(obj, p)) {
+                    str += `<input required type="radio" id="${p}" name="${name}" value="${obj_1[p]}"> <label for="${p}">` + p + ':' + obj[p] +'%</label><br>';
+                }
+            }
+            return str;
+        }
+    </script>
+</body>
+</html>
